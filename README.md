@@ -6,12 +6,12 @@ Put the script in your `/usr/local/bin` folder and you're all set.
 ### To view your current aliases
 `aliastracker -v`
 
-![view](docs/img/1.png)
+![view](docs/img/2.png)
 
 ### To add to your current aliases
-`aliastracker -a "l=ls"`
+`aliastracker -a "l=ll"`
 
-![add](docs/img/2.png)
+![add](docs/img/1.png)
 
 ### To remove from your current aliases
 `aliastracker -r`
