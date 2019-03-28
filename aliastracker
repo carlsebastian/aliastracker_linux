@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+import sys, getopt, re
+
+argument_string = """script.py -h #Help\nscript.py -a "alias=program" #adds Alias\nscript.py -r #Removes Alias\nscript.py -v #Views all Aliases\n"""
+reload_indication = "Don't forget to reload the terminal using source ~/.bashrc"
+
+def getHomeDirectoryPythonVersion():
+    if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] > 4):
+        from os.path import expanduser
+        home = expanduser("~")
+    else:
+        from pathlib import Path
+        home = str(Path.home())
+    return home
+
+def parseAlias(alias):
+    if len(re.findall('=',alias))<1 or len(re.findall('=',alias))>1:
+        print("Incorrect alias: \n\n"+argument_string)
+        sys.exit(2)
+
+
+def main(argv):
+    home = getHomeDirectoryPythonVersion()
+    try:
+        open(home+"/.bash_aliases", 'r')
+    except IOError:
+        print("You do not have the file .bash_aliases in your home directory")
+        sys.exit(2)
+    
+    if len(argv)<1:
+        print("No argument given: \n\n"+argument_string)
+        sys.exit(2)
+    try:
+        opts, args = getopt.getopt(argv,"harv",["alias"])
+    except getopt.GetoptError:
+        print("Invalid Argument: \n\n"+argument_string)
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print("Help: \n\n"+argument_string)
+            sys.exit()
+        #Checks python version and chooses strategy for finding homedirectory
+        if opt == '-v':
+            file_object  = open(home+"/.bash_aliases", 'r')
+            print("Current Aliases:\n"+file_object.read())
+            file_object.close()
+
+        if opt == '-a':
+            parseAlias(argv[1])
+            file_object = open(home+"/.bash_aliases", 'a')
+            file_object.write("alias"+' "'+argv[1]+'"\n')
+            file_object.close()
+            print("Added alias.")
+            print(reload_indication)
+        if opt == '-r':
+            i = 0
+            file_object = open(home+"/.bash_aliases", 'r')
+            content = file_object.readlines()
+            print("Choose Index to remove:")
+            for line in content:
+                print(str(i)+". "+line)
+                i += 1
+            file_object.close()
+            linenr_in = int(input("Pick line nr to remove: "))
+            if linenr_in >=len(content):
+                print("Non-existing index")
+                sys.exit()
+            content.pop(linenr_in)
+            file_object = open(home+"/.bash_aliases", 'w')
+            for line in content:
+                file_object.write(line)
+            file_object.close()
+            print("Removed alias.")
+            print(reload_indication)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
